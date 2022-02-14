@@ -33,42 +33,77 @@ pragma solidity >=0.8.0 < 0.9.0;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
 
-contract SharedWallet is Ownable{
+// contract SharedWallet is Ownable{
 
-    function isOwner() internal view returns(bool){
+//     function isOwner() internal view returns(bool){
+//         return owner() == msg.sender;
+//     }
+
+//     mapping(address => uint) public allowance;
+
+//     //Owner of contract can add address and the amount the address will get
+//     function addAllowance(address _who, uint _amount) public onlyOwner {
+//         allowance[who] = _amount;
+//     }
+
+//     //Check if you are owner or address that is allowed to withdraw
+//     modifier OwnerOrAllowed (uint _amount){
+//         require(isOwner() || allowance[msg.sender] >= _amount, "You are not allowed");
+//     }
+
+//     function reduceAllowance(address _who, uint _amount) internal OwnerOrAllowed(_amount) {
+//         allowance[_who] -= _amount;
+//     }
+
+//       // Withdraw function
+//     function withdrawMoney(address payable _to, uint _amount) public OwnerOrAllowed(_amount){
+//         require(_amount <= address(this).balance, "contract doesn't have enough money");
+//         if(!isOwner()){
+//             reduceAllowance(msg.sender, _amount);
+//         }
+//         _to.transfer(_amount);
+//     }
+//     //Check balance getter
+//     function checkWalletBalance() public view returns(uint){
+//         return address(this).balance;
+//     }
+
+//     receive() external payable {
+
+//     }
+// }
+
+// improving the contract
+
+contract Allowance is Ownable {
+    function isOwner() internal view returns (bool){
         return owner() == msg.sender;
     }
 
     mapping(address => uint) public allowance;
 
-    //Owner of contract can add address and the amount the address will get
-    function addAllowance(address _who, uint _amount) public onlyOwner {
-        allowance[who] = _amount;
+    function setAllownace(address _who, uint _amount) public onlyOwner {
+        allowance[_who] = _amount;
     }
 
-    //Check if you are owner or address that is allowed to withdraw
-    modifier OwnerOrAllowed (uint _amount){
-        require(isOwner() || allowance[msg.sender] >= _amount, "You are not allowed");
+    modifier ownerOrAllowed(uint _amount){
+        require(isOwner() || allowance[msg.sender] >= _amount, "you are not allowed!");
+        _;
     }
 
-    function reduceAllowance(address _who, uint _amount) internal OwnerOrAllowed(_amount) {
-        allowance[_who] -= _amount;
+    function reduceAllowance(address _who, uint _amount) internal ownerOrAllowed(_amount){
+        allowance[who] -= _amount;
     }
+    
+}
 
-      // Withdraw function
-    function withdrawMoney(address payable _to, uint _amount) public OwnerOrAllowed(_amount){
+contract SharedWallet is Allowance {
+    function withdrawMoney(address payable _to, uint _amount) public ownerOrAllowed(_amount) {
         require(_amount <= address(this).balance, "contract doesn't have enough money");
         if(!isOwner()){
             reduceAllowance(msg.sender, _amount);
         }
         _to.transfer(_amount);
     }
-    //Check balance getter
-    function checkWalletBalance() public view returns(uint){
-        return address(this).balance;
-    }
-
-    receive() external payable {
-
-    }
+    receive() external payable;
 }

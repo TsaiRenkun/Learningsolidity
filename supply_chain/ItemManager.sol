@@ -1,5 +1,16 @@
 pragma solidity >= 0.8.0 < 0.9.0;
 
+contract Item {
+    uint public priceInWei;
+    uint public index;
+
+    ItemManager parentContract;
+
+    constructor(ItemManager _parentConract, uint _priceInWei, uint _index){
+
+    }
+}
+
 contract ItemManager {
 
     enum SupplyChainState{Created, Paid, Delivered}
@@ -27,7 +38,7 @@ contract ItemManager {
        require(items[_itemIndex]._itemPrice == msg.value, "Must be fully paid");
        require(items[_itemIndex]._state == SupplyChainState.Created, "Item is further in the chain");
        items[_itemIndex]._state = SupplyChainState.Paid;
-       
+
        emit SupplyChainStep(itemIndex, uint(items[itemIndex]._state));
     }
 

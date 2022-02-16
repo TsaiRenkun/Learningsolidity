@@ -32,6 +32,7 @@ User management
 pragma solidity >=0.8.0 < 0.9.0;
 
 import "https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/access/Ownable.sol";
+import "https://github.com/OpenZeppelin/openzeppelin-contracts/contracts/math/SafeMath.sol";
 
 // contract SharedWallet is Ownable{
 
@@ -80,6 +81,8 @@ contract Allowance is Ownable {
         return owner() == msg.sender;
     }
 
+    using SafeMath for uint;
+
     event AllowanceChanged(address indexed _forWho, address indexed _byWhom, uint _oldAmount, uint _newAmount);
     mapping(address => uint) public allowance;
 
@@ -95,7 +98,7 @@ contract Allowance is Ownable {
 
     function reduceAllowance(address _who, uint _amount) internal ownerOrAllowed(_amount){
         emit AllowanceChanged(_who, msg.sender, allowance[_who], _amount);
-        allowance[who] -= _amount;
+        allowance[_who] = allowance[_who].sub(_amount);
     }
     
 }
